@@ -1,10 +1,13 @@
 const express =  require('express')
 const router = express.Router()
-const controller = require('../controller/UserController');
+const UserController = require('../controller/UserController');
+//Helper
+    const verifyToken = require('../helpers/check-user')
 //User
-    router.get('/' , controller.all);
-    router.post('/login',controller.login);
-    router.post('/user', controller.newUser);
-    router.delete('/user/:id', controller.deleteUser);
-    
+    router.get('/' , UserController.all);
+    router.post('/login',UserController.login);
+    router.post('/user', UserController.newUser);
+    router.delete('/user/:id', verifyToken ,UserController.deleteUser);
+
+
 module.exports = router

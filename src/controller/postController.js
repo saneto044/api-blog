@@ -43,23 +43,31 @@ module.exports = class blogController{
         }
     }
     static async updatePost(req,res){
-        const{name, body} = req.body
-        if(!name){
-            res.status(422).json({message:"mandatory name"})
+        const{title, body} = req.body
+        if(!title){
+            res.status(422).json({message:"mandatory title"})
+            return
         }
         if(!body){
             res.status(422).json({message:"mandatory body"})
+            return
         }
-        try {
-            const id = req.params.id ;
-            const validatorId = await Post.findOne({id})
-            const newPost = {name,body}
-            
-            console.log(validatorId.title, validatorId.body)
-            res.status(200).json({validatorId})
+        try { 
+            const newPost = await Post.updateOne({title,body})
+            res.status(200).json({message:`Post successfully updated `})
+
         } catch (error) {
             res.status(500).json({message:`There was an error ${error}`})
         }
 
+    }
+    static async getPost(req,res){
+        const id = req.params.id
+        const validatorId = await Post.findOne({id})
+        if(validatorId){
+            res.status(200).json({validatorId})
+        }else{
+            res.status(404).json({ error:"not find post"})
+        }
     }
 }

@@ -1,30 +1,45 @@
 const mongoose = require('mongoose')
 const user = require('../models/User')
 const User = mongoose.model('User',user)
-const brcypt = require('bcrypt')
+const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
 
-//helpers 
-    const createdUserToken = require('../helpers/create-user-token')
+//Helpers
+const getUserByToken = require('../helpers/get-user-by-token');
+const getToken = require('../helpers/get-token');
+const createdUserToken = require('../helpers/create-user-token');
 
 module.exports = class controller{
     static all(req,res){
       res.status(200).json({message:"Tudo ok!"})
     }  
     static async login(req,res){
-        const {name , email} = req.body;
+        const {password , email} = req.body;
     
-        if(!name){
+        if(!email){
             res.status(422).json({message:'Required fields'})
             return
         }
-        if(!name){
+        if(!password){
             res.status(422).json({message:'Required fields'})
             return
         }
-        const user = await User.findOne({email:email})
-        console.log(user)
-        res.status(200).json({message:'Passei por tudo'})
+            const user = await User.findOne({email:email})
+       
+            const validatorPassword = await bcrypt.compare(password,user.password)
+            console.log(password)            
+            console.log(user.password)
+            console.log(validatorPassword)
+            
+            if(!validatorPassword){
+              return res.status(422).json({message:'Password invalid'})  
+            }
+
+            const token = await createdUserToken(user,req,res)
+            console.log(token)        
+            res.status(200).json({message:'Login sucessefully'})    
+
+        
     }
     static async newUser(req,res){
         const {name , email, confirmPassword,password } = req.body;
@@ -61,8 +76,8 @@ module.exports = class controller{
         }       
         
         try {
-            const salt = await brcypt.genSalt(12)
-            const passwordHash = await brcypt.hash(password,salt)
+            const salt = await bcrypt.genSalt(12)
+            const passwordHash = await bcrypt.hash(password,salt)
             const newUser = new User({name,email, password:passwordHash})
             await newUser.save();
             await createdUserToken(newUser,req,res)

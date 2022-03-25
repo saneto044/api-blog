@@ -9,7 +9,7 @@ app.use(express.urlencoded({extended:false}))
 app.use(express.json())
 
 //Router
-const postRouter = require('./router/BlogRouter')
+const postRouter = require('./router/PostRouter')
 const router = require('./router/UserRouter')
 app.use('/', router)
 app.use('/post',postRouter)
